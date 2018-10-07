@@ -232,6 +232,9 @@ NavMeshTesterTool::NavMeshTesterTool() :
 	m_distanceToWall(0),
 	m_sposSet(false),
 	m_eposSet(false),
+	m_perfTest(false),
+	m_perfTestCount(10000),
+	m_perfTestResult(0),
 	m_pathIterNum(0),
 	m_pathIterPolyCount(0),
 	m_steerPointCount(0)
@@ -271,6 +274,30 @@ void NavMeshTesterTool::init(Sample* sample)
 
 void NavMeshTesterTool::handleMenu()
 {
+	static const char* modename[] = {
+		"TOOLMODE_PATHFIND_FOLLOW",
+		"TOOLMODE_PATHFIND_STRAIGHT",
+		"TOOLMODE_PATHFIND_SLICED",
+		"TOOLMODE_RAYCAST",
+		"TOOLMODE_DISTANCE_TO_WALL",
+		"TOOLMODE_FIND_POLYS_IN_CIRCLE",
+		"TOOLMODE_FIND_POLYS_IN_SHAPE",
+		"TOOLMODE_FIND_LOCAL_NEIGHBOURHOOD",
+	};
+	imguiLabel("PerformanceTest");
+	if (imguiCheck("Enable", m_perfTest))
+	{
+		m_perfTest = !m_perfTest;
+	}
+	imguiSlider("TestCount", &m_perfTestCount, 0.f, 1000000.f, 10000);
+	imguiLabel(modename[m_toolMode]);
+	char msg[128];
+	snprintf(msg, 128, "times/s:  %d", (int)m_perfTestResult);
+	imguiLabel(msg);
+	snprintf(msg, 128, "times/ms: %d", (int)(m_perfTestResult/1000.f));
+	imguiLabel(msg);
+	imguiSeparator();
+
 	if (imguiCheck("Pathfind Follow", m_toolMode == TOOLMODE_PATHFIND_FOLLOW))
 	{
 		m_toolMode = TOOLMODE_PATHFIND_FOLLOW;
@@ -676,8 +703,27 @@ void NavMeshTesterTool::reset()
 	m_distanceToWall = 0;
 }
 
-
+#include <chrono>
 void NavMeshTesterTool::recalc()
+{
+	using namespace std::chrono;
+	using second_t = duration<float, std::ratio<1>>;
+	if (!m_perfTest) {
+		_recalc();
+	}
+	else 
+	{
+		auto start = system_clock::now();
+		int count = (int)m_perfTestCount;
+		for (int i = 0; i < count; ++i) {
+			_recalc();
+		}
+		auto timeused = duration_cast<second_t>(system_clock::now() - start).count();
+		m_perfTestResult = m_perfTestCount / timeused;
+	}
+}
+
+void NavMeshTesterTool::_recalc()
 {
 	if (!m_navMesh)
 		return;

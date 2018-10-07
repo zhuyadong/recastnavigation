@@ -82,6 +82,9 @@ class NavMeshTesterTool : public SampleTool
 	float m_randomRadius;
 	bool m_sposSet;
 	bool m_eposSet;
+	bool m_perfTest;
+	float m_perfTestCount;
+	float m_perfTestResult;
 
 	int m_pathIterNum;
 	dtPolyRef m_pathIterPolys[MAX_POLYS]; 
@@ -107,6 +110,7 @@ public:
 	virtual void handleRenderOverlay(double* proj, double* model, int* view);
 
 	void recalc();
+	void _recalc();
 	void drawAgent(const float* pos, float r, float h, float c, const unsigned int col);
 };
 
