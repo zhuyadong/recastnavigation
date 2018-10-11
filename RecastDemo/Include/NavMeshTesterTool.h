@@ -83,6 +83,7 @@ class NavMeshTesterTool : public SampleTool
 	bool m_sposSet;
 	bool m_eposSet;
 	bool m_perfTest;
+	bool m_perfTestFindPoly;
 	float m_perfTestCount;
 	float m_perfTestResult;
 

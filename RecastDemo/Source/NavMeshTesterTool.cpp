@@ -233,6 +233,7 @@ NavMeshTesterTool::NavMeshTesterTool() :
 	m_sposSet(false),
 	m_eposSet(false),
 	m_perfTest(false),
+	m_perfTestFindPoly(false),
 	m_perfTestCount(10000),
 	m_perfTestResult(0),
 	m_pathIterNum(0),
@@ -289,7 +290,11 @@ void NavMeshTesterTool::handleMenu()
 	{
 		m_perfTest = !m_perfTest;
 	}
-	imguiSlider("TestCount", &m_perfTestCount, 0.f, 1000000.f, 10000);
+	if (imguiCheck("OnlyTestFindPoly", m_perfTestFindPoly))
+	{
+		m_perfTestFindPoly = !m_perfTestFindPoly;
+	}
+	imguiSlider("TestCount", &m_perfTestCount, 0.f, 1000000.f, 1000);
 	imguiLabel(modename[m_toolMode]);
 	char msg[128];
 	snprintf(msg, 128, "times/s:  %d", (int)m_perfTestResult);
@@ -732,12 +737,15 @@ void NavMeshTesterTool::_recalc()
 		m_navQuery->findNearestPoly(m_spos, m_polyPickExt, &m_filter, &m_startRef, 0);
 	else
 		m_startRef = 0;
-	
+	if (m_sposSet && m_perfTestFindPoly) return;
+
 	if (m_eposSet)
 		m_navQuery->findNearestPoly(m_epos, m_polyPickExt, &m_filter, &m_endRef, 0);
 	else
 		m_endRef = 0;
-	
+
+	if (m_perfTestFindPoly) return;
+
 	m_pathFindStatus = DT_FAILURE;
 	
 	if (m_toolMode == TOOLMODE_PATHFIND_FOLLOW)
