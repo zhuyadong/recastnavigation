@@ -302,6 +302,23 @@ void NavMeshTesterTool::handleMenu()
 	snprintf(msg, 128, "times/ms: %d", (int)(m_perfTestResult/1000.f));
 	imguiLabel(msg);
 	imguiSeparator();
+	if (m_sposSet) {
+		snprintf(msg, 128, "start[0]: %f", m_spos[0]);
+		imguiLabel(msg);
+		snprintf(msg, 128, "start[1]: %f", m_spos[1]);
+		imguiLabel(msg);
+		snprintf(msg, 128, "start[2]: %f", m_spos[2]);
+		imguiLabel(msg);
+	}
+	if (m_eposSet) {
+		snprintf(msg, 128, "end[0]: %f", m_epos[0]);
+		imguiLabel(msg);
+		snprintf(msg, 128, "end[1]: %f", m_epos[1]);
+		imguiLabel(msg);
+		snprintf(msg, 128, "end[2]: %f", m_epos[2]);
+		imguiLabel(msg);
+	}
+	imguiSeparator();
 
 	if (imguiCheck("Pathfind Follow", m_toolMode == TOOLMODE_PATHFIND_FOLLOW))
 	{
