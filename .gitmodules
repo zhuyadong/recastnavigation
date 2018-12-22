@@ -1,0 +1,3 @@
+[submodule "RecastDemo/Contrib/imgui"]
+	path = RecastDemo/Contrib/imgui
+	url = https://github.com/ocornut/imgui.git

@@ -1,4 +1,4 @@
-file(GLOB SOURCES Source/*.cpp Contrib/fastlz/fastlz.c)
+file(GLOB SOURCES Source/*.cpp Contrib/fastlz/fastlz.c Contrib/imgui/imgui.cpp Contrib/imgui/imgui_draw.cpp  Contrib/imgui/imgui_widgets.cpp)
 
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
 

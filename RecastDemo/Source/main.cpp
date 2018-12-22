@@ -44,6 +44,10 @@
 #include "Sample_TempObstacles.h"
 #include "Sample_Debug.h"
 
+#include <imgui/imgui.h>
+#include "imgui_impl_sdl.h"
+#include "imgui_impl_opengl2.h"
+
 #ifdef WIN32
 #	define snprintf _snprintf
 #	define putenv _putenv
@@ -81,6 +85,7 @@ int main(int /*argc*/, char** /*argv*/)
 	// Enable depth buffer.
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 24);
+    SDL_GL_SetAttribute(SDL_GL_STENCIL_SIZE, 8);
 	
 	// Set color channel depth.
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 8);
@@ -126,7 +131,21 @@ int main(int /*argc*/, char** /*argv*/)
 	}
 
 	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
-	SDL_GL_CreateContext(window);
+	SDL_GLContext gl_context = SDL_GL_CreateContext(window);
+
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO(); (void)io;
+    //io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+    //ImGui::StyleColorsClassic();
+
+    // Setup Platform/Renderer bindings
+    ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
+    ImGui_ImplOpenGL2_Init();
 
 	if (!imguiRenderGLInit("DroidSans.ttf"))
 	{
@@ -206,6 +225,8 @@ int main(int /*argc*/, char** /*argv*/)
 		
 		while (SDL_PollEvent(&event))
 		{
+            ImGui_ImplSDL2_ProcessEvent(&event);
+
 			switch (event.type)
 			{
 				case SDL_KEYDOWN:
@@ -506,6 +527,11 @@ int main(int /*argc*/, char** /*argv*/)
 		
 		imguiBeginFrame(mousePos[0], mousePos[1], mouseButtonMask, mouseScroll);
 		
+        // Start the Dear ImGui frame
+        ImGui_ImplOpenGL2_NewFrame();
+        ImGui_ImplSDL2_NewFrame(window);
+        ImGui::NewFrame();
+
 		if (sample)
 		{
 			sample->handleRenderOverlay((double*)projectionMatrix, (double*)modelviewMatrix, (int*)viewport);
@@ -525,6 +551,29 @@ int main(int /*argc*/, char** /*argv*/)
 		
 		if (showMenu)
 		{
+#if 0
+			ImGui::SetNextWindowSize(ImVec2(250, height - 20));
+			ImGui::SetNextWindowPos(ImVec2(width-250-250, 10));
+			ImGui::Begin("Properties");
+			ImGui::Checkbox("Show Log", &showLog);
+			ImGui::Checkbox("Show Tools", &showTools);
+
+			ImGui::Separator();
+			ImGui::Text("Sample");
+			if (ImGui::Button(sampleName.c_str()))
+			{
+				if (showSample)
+				{
+					showSample = false;
+				}
+				else
+				{
+					showSample = true;
+					showLevels = false;
+					showTestCases = false;
+				}
+			}
+#endif
 			if (imguiBeginScrollArea("Properties", width-250-10, 10, 250, height-20, &propScroll))
 				mouseOverMenu = true;
 
@@ -607,6 +656,8 @@ int main(int /*argc*/, char** /*argv*/)
 			}
 
 			imguiEndScrollArea();
+
+			//ImGui::End();
 		}
 		
 		// Sample selection dialog.
@@ -882,6 +933,10 @@ int main(int /*argc*/, char** /*argv*/)
 		// Left column tools menu
 		if (!showTestCases && showTools && showMenu) // && geom && sample)
 		{
+			//ImGui::SetNextWindowSize(ImVec2(250, height-20));
+			ImGui::SetNextWindowPos(ImVec2(260, 10));
+			ImGui::Begin("Tools+");
+
 			if (imguiBeginScrollArea("Tools", 10, 10, 250, height - 20, &toolsScroll))
 				mouseOverMenu = true;
 
@@ -889,6 +944,8 @@ int main(int /*argc*/, char** /*argv*/)
 				sample->handleTools();
 			
 			imguiEndScrollArea();
+
+			ImGui::End();
 		}
 		
 		// Marker
@@ -913,13 +970,22 @@ int main(int /*argc*/, char** /*argv*/)
 		
 		imguiEndFrame();
 		imguiRenderGLDraw();		
-		
+
+        ImGui::Render();
+        ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
+
+
 		glEnable(GL_DEPTH_TEST);
 		SDL_GL_SwapWindow(window);
 	}
 	
 	imguiRenderGLDestroy();
 	
+    // Cleanup
+    ImGui_ImplOpenGL2_Shutdown();
+    ImGui_ImplSDL2_Shutdown();
+    ImGui::DestroyContext();
+
 	SDL_Quit();
 	
 	delete sample;

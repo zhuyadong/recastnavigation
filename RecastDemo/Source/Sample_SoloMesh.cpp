@@ -20,6 +20,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <imgui/imgui.h>
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "imgui.h"

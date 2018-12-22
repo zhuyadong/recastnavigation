@@ -37,6 +37,7 @@
 #include "DetourNavMeshBuilder.h"
 #include "DetourDebugDraw.h"
 #include "DetourCommon.h"
+#include <imgui/imgui.h>
 
 #ifdef WIN32
 #	define snprintf _snprintf
@@ -285,40 +286,25 @@ void NavMeshTesterTool::handleMenu()
 		"TOOLMODE_FIND_POLYS_IN_SHAPE",
 		"TOOLMODE_FIND_LOCAL_NEIGHBOURHOOD",
 	};
-	imguiLabel("PerformanceTest");
-	if (imguiCheck("Enable", m_perfTest))
-	{
-		m_perfTest = !m_perfTest;
-	}
-	if (imguiCheck("OnlyTestFindPoly", m_perfTestFindPoly))
-	{
-		m_perfTestFindPoly = !m_perfTestFindPoly;
-	}
-	imguiSlider("TestCount", &m_perfTestCount, 0.f, 1000000.f, 1000);
-	imguiLabel(modename[m_toolMode]);
+	ImGui::Text("PerformanceTest");
+	ImGui::Checkbox("Enable", &m_perfTest);
+	ImGui::Checkbox("OnlyTestFindPoly", &m_perfTestFindPoly);
+	ImGui::SliderInt("TestCount", &m_perfTestCount, 0, 1000000.f);
+	ImGui::Text(modename[m_toolMode]);
+
 	char msg[128];
 	snprintf(msg, 128, "times/s:  %d", (int)m_perfTestResult);
-	imguiLabel(msg);
+	ImGui::Text(msg);
 	snprintf(msg, 128, "times/ms: %d", (int)(m_perfTestResult/1000.f));
-	imguiLabel(msg);
-	imguiSeparator();
+	ImGui::Text(msg);
+	ImGui::Separator();
 	if (m_sposSet) {
-		snprintf(msg, 128, "start[0]: %f", m_spos[0]);
-		imguiLabel(msg);
-		snprintf(msg, 128, "start[1]: %f", m_spos[1]);
-		imguiLabel(msg);
-		snprintf(msg, 128, "start[2]: %f", m_spos[2]);
-		imguiLabel(msg);
+		ImGui::InputFloat3("start pos", m_spos);
 	}
 	if (m_eposSet) {
-		snprintf(msg, 128, "end[0]: %f", m_epos[0]);
-		imguiLabel(msg);
-		snprintf(msg, 128, "end[1]: %f", m_epos[1]);
-		imguiLabel(msg);
-		snprintf(msg, 128, "end[2]: %f", m_epos[2]);
-		imguiLabel(msg);
+		ImGui::InputFloat3("stop  pos", m_epos);
 	}
-	imguiSeparator();
+	ImGui::Separator();
 
 	if (imguiCheck("Pathfind Follow", m_toolMode == TOOLMODE_PATHFIND_FOLLOW))
 	{
