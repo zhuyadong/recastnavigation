@@ -20,6 +20,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <imgui/imgui.h>
 #include "SDL.h"
 #include "SDL_opengl.h"
 #ifdef __APPLE__
@@ -27,7 +28,6 @@
 #else
 #	include <GL/glu.h>
 #endif
-#include "imgui.h"
 #include "InputGeom.h"
 #include "Sample.h"
 #include "Sample_TileMesh.h"
@@ -102,13 +102,13 @@ public:
 
 	virtual void handleMenu()
 	{
-		imguiLabel("Create Tiles");
-		if (imguiButton("Create All"))
+		ImGui::Text("Create Tiles");
+		if (ImGui::Button("Create All"))
 		{
 			if (m_sample)
 				m_sample->buildAllTiles();
 		}
-		if (imguiButton("Remove All"))
+		if (ImGui::Button("Remove All"))
 		{
 			if (m_sample)
 				m_sample->removeAllTiles();
@@ -163,12 +163,12 @@ public:
 			m_sample->getTilePos(m_hitPos, tx, ty);
 			char text[32];
 			snprintf(text,32,"(%d,%d)", tx,ty);
-			imguiDrawText((int)x, (int)y-25, IMGUI_ALIGN_CENTER, text, imguiRGBA(0,0,0,220));
+			//imguiDrawText((int)x, (int)y-25, IMGUI_ALIGN_CENTER, text, imguiRGBA(0,0,0,220));
 		}
 		
 		// Tool help
 		const int h = view[3];
-		imguiDrawText(280, h-40, IMGUI_ALIGN_LEFT, "LMB: Rebuild hit tile.  Shift+LMB: Clear hit tile.", imguiRGBA(255,255,255,192));	
+		//imguiDrawText(280, h-40, IMGUI_ALIGN_LEFT, "LMB: Rebuild hit tile.  Shift+LMB: Clear hit tile.", imguiRGBA(255,255,255,192));	
 	}
 };
 
@@ -228,14 +228,14 @@ void Sample_TileMesh::handleSettings()
 {
 	Sample::handleCommonSettings();
 
-	if (imguiCheck("Keep Itermediate Results", m_keepInterResults))
+	if (ImGui::RadioButton("Keep Itermediate Results", m_keepInterResults))
 		m_keepInterResults = !m_keepInterResults;
 
-	if (imguiCheck("Build All Tiles", m_buildAll))
+	if (ImGui::RadioButton("Build All Tiles", m_buildAll))
 		m_buildAll = !m_buildAll;
 	
-	imguiLabel("Tiling");
-	imguiSlider("TileSize", &m_tileSize, 16.0f, 1024.0f, 16.0f);
+	ImGui::Text("Tiling");
+	ImGui::SliderFloat("TileSize", &m_tileSize, 16.0f, 1024.0f);
 	
 	if (m_geom)
 	{
@@ -248,7 +248,7 @@ void Sample_TileMesh::handleSettings()
 		const int tw = (gw + ts-1) / ts;
 		const int th = (gh + ts-1) / ts;
 		snprintf(text, 64, "Tiles  %d x %d", tw, th);
-		imguiValue(text);
+		ImGui::Text(text);
 
 		// Max tiles and max polys affect how the tile IDs are caculated.
 		// There are 22 bits available for identifying a tile and a polygon.
@@ -258,9 +258,9 @@ void Sample_TileMesh::handleSettings()
 		m_maxTiles = 1 << tileBits;
 		m_maxPolysPerTile = 1 << polyBits;
 		snprintf(text, 64, "Max Tiles  %d", m_maxTiles);
-		imguiValue(text);
+		ImGui::Text(text);
 		snprintf(text, 64, "Max Polys  %d", m_maxPolysPerTile);
-		imguiValue(text);
+		ImGui::Text(text);
 	}
 	else
 	{
@@ -268,33 +268,33 @@ void Sample_TileMesh::handleSettings()
 		m_maxPolysPerTile = 0;
 	}
 	
-	imguiSeparator();
+	ImGui::Separator();
 	
-	imguiIndent();
-	imguiIndent();
+	//imguiIndent();
+	//imguiIndent();
 	
-	if (imguiButton("Save"))
+	if (ImGui::Button("Save"))
 	{
 		Sample::saveAll("all_tiles_navmesh.bin", m_navMesh);
 	}
 
-	if (imguiButton("Load"))
+	if (ImGui::Button("Load"))
 	{
 		dtFreeNavMesh(m_navMesh);
 		m_navMesh = Sample::loadAll("all_tiles_navmesh.bin");
 		m_navQuery->init(m_navMesh, 2048);
 	}
 
-	imguiUnindent();
-	imguiUnindent();
+	//imguiUnindent();
+	//imguiUnindent();
 	
 	char msg[64];
 	snprintf(msg, 64, "Build Time: %.1fms", m_totalBuildTimeMs);
-	imguiLabel(msg);
+	ImGui::Text(msg);
 	
-	imguiSeparator();
+	ImGui::Separator();
 	
-	imguiSeparator();
+	ImGui::Separator();
 	
 }
 
@@ -302,39 +302,39 @@ void Sample_TileMesh::handleTools()
 {
 	int type = !m_tool ? TOOL_NONE : m_tool->type();
 
-	if (imguiCheck("Test Navmesh", type == TOOL_NAVMESH_TESTER))
+	if (ImGui::RadioButton("Test Navmesh", type == TOOL_NAVMESH_TESTER))
 	{
 		setTool(new NavMeshTesterTool);
 	}
-	if (imguiCheck("Prune Navmesh", type == TOOL_NAVMESH_PRUNE))
+	if (ImGui::RadioButton("Prune Navmesh", type == TOOL_NAVMESH_PRUNE))
 	{
 		setTool(new NavMeshPruneTool);
 	}
-	if (imguiCheck("Create Tiles", type == TOOL_TILE_EDIT))
+	if (ImGui::RadioButton("Create Tiles", type == TOOL_TILE_EDIT))
 	{
 		setTool(new NavMeshTileTool);
 	}
-	if (imguiCheck("Create Off-Mesh Links", type == TOOL_OFFMESH_CONNECTION))
+	if (ImGui::RadioButton("Create Off-Mesh Links", type == TOOL_OFFMESH_CONNECTION))
 	{
 		setTool(new OffMeshConnectionTool);
 	}
-	if (imguiCheck("Create Convex Volumes", type == TOOL_CONVEX_VOLUME))
+	if (ImGui::RadioButton("Create Convex Volumes", type == TOOL_CONVEX_VOLUME))
 	{
 		setTool(new ConvexVolumeTool);
 	}
-	if (imguiCheck("Create Crowds", type == TOOL_CROWD))
+	if (ImGui::RadioButton("Create Crowds", type == TOOL_CROWD))
 	{
 		setTool(new CrowdTool);
 	}
 	
-	imguiSeparatorLine();
+	ImGui::Separator();
 
-	imguiIndent();
+	//imguiIndent();
 
 	if (m_tool)
 		m_tool->handleMenu();
 
-	imguiUnindent();
+	//imguiUnindent();
 }
 
 void Sample_TileMesh::handleDebugMode()
@@ -373,49 +373,49 @@ void Sample_TileMesh::handleDebugMode()
 	if (unavail == MAX_DRAWMODE)
 		return;
 	
-	imguiLabel("Draw");
-	if (imguiCheck("Input Mesh", m_drawMode == DRAWMODE_MESH, valid[DRAWMODE_MESH]))
+	ImGui::Text("Draw");
+	if (ImGui::RadioButton("Input Mesh", m_drawMode == DRAWMODE_MESH, valid[DRAWMODE_MESH]))
 		m_drawMode = DRAWMODE_MESH;
-	if (imguiCheck("Navmesh", m_drawMode == DRAWMODE_NAVMESH, valid[DRAWMODE_NAVMESH]))
+	if (ImGui::RadioButton("Navmesh", m_drawMode == DRAWMODE_NAVMESH, valid[DRAWMODE_NAVMESH]))
 		m_drawMode = DRAWMODE_NAVMESH;
-	if (imguiCheck("Navmesh Invis", m_drawMode == DRAWMODE_NAVMESH_INVIS, valid[DRAWMODE_NAVMESH_INVIS]))
+	if (ImGui::RadioButton("Navmesh Invis", m_drawMode == DRAWMODE_NAVMESH_INVIS, valid[DRAWMODE_NAVMESH_INVIS]))
 		m_drawMode = DRAWMODE_NAVMESH_INVIS;
-	if (imguiCheck("Navmesh Trans", m_drawMode == DRAWMODE_NAVMESH_TRANS, valid[DRAWMODE_NAVMESH_TRANS]))
+	if (ImGui::RadioButton("Navmesh Trans", m_drawMode == DRAWMODE_NAVMESH_TRANS, valid[DRAWMODE_NAVMESH_TRANS]))
 		m_drawMode = DRAWMODE_NAVMESH_TRANS;
-	if (imguiCheck("Navmesh BVTree", m_drawMode == DRAWMODE_NAVMESH_BVTREE, valid[DRAWMODE_NAVMESH_BVTREE]))
+	if (ImGui::RadioButton("Navmesh BVTree", m_drawMode == DRAWMODE_NAVMESH_BVTREE, valid[DRAWMODE_NAVMESH_BVTREE]))
 		m_drawMode = DRAWMODE_NAVMESH_BVTREE;
-	if (imguiCheck("Navmesh Nodes", m_drawMode == DRAWMODE_NAVMESH_NODES, valid[DRAWMODE_NAVMESH_NODES]))
+	if (ImGui::RadioButton("Navmesh Nodes", m_drawMode == DRAWMODE_NAVMESH_NODES, valid[DRAWMODE_NAVMESH_NODES]))
 		m_drawMode = DRAWMODE_NAVMESH_NODES;
-	if (imguiCheck("Navmesh Portals", m_drawMode == DRAWMODE_NAVMESH_PORTALS, valid[DRAWMODE_NAVMESH_PORTALS]))
+	if (ImGui::RadioButton("Navmesh Portals", m_drawMode == DRAWMODE_NAVMESH_PORTALS, valid[DRAWMODE_NAVMESH_PORTALS]))
 		m_drawMode = DRAWMODE_NAVMESH_PORTALS;
-	if (imguiCheck("Voxels", m_drawMode == DRAWMODE_VOXELS, valid[DRAWMODE_VOXELS]))
+	if (ImGui::RadioButton("Voxels", m_drawMode == DRAWMODE_VOXELS, valid[DRAWMODE_VOXELS]))
 		m_drawMode = DRAWMODE_VOXELS;
-	if (imguiCheck("Walkable Voxels", m_drawMode == DRAWMODE_VOXELS_WALKABLE, valid[DRAWMODE_VOXELS_WALKABLE]))
+	if (ImGui::RadioButton("Walkable Voxels", m_drawMode == DRAWMODE_VOXELS_WALKABLE, valid[DRAWMODE_VOXELS_WALKABLE]))
 		m_drawMode = DRAWMODE_VOXELS_WALKABLE;
-	if (imguiCheck("Compact", m_drawMode == DRAWMODE_COMPACT, valid[DRAWMODE_COMPACT]))
+	if (ImGui::RadioButton("Compact", m_drawMode == DRAWMODE_COMPACT, valid[DRAWMODE_COMPACT]))
 		m_drawMode = DRAWMODE_COMPACT;
-	if (imguiCheck("Compact Distance", m_drawMode == DRAWMODE_COMPACT_DISTANCE, valid[DRAWMODE_COMPACT_DISTANCE]))
+	if (ImGui::RadioButton("Compact Distance", m_drawMode == DRAWMODE_COMPACT_DISTANCE, valid[DRAWMODE_COMPACT_DISTANCE]))
 		m_drawMode = DRAWMODE_COMPACT_DISTANCE;
-	if (imguiCheck("Compact Regions", m_drawMode == DRAWMODE_COMPACT_REGIONS, valid[DRAWMODE_COMPACT_REGIONS]))
+	if (ImGui::RadioButton("Compact Regions", m_drawMode == DRAWMODE_COMPACT_REGIONS, valid[DRAWMODE_COMPACT_REGIONS]))
 		m_drawMode = DRAWMODE_COMPACT_REGIONS;
-	if (imguiCheck("Region Connections", m_drawMode == DRAWMODE_REGION_CONNECTIONS, valid[DRAWMODE_REGION_CONNECTIONS]))
+	if (ImGui::RadioButton("Region Connections", m_drawMode == DRAWMODE_REGION_CONNECTIONS, valid[DRAWMODE_REGION_CONNECTIONS]))
 		m_drawMode = DRAWMODE_REGION_CONNECTIONS;
-	if (imguiCheck("Raw Contours", m_drawMode == DRAWMODE_RAW_CONTOURS, valid[DRAWMODE_RAW_CONTOURS]))
+	if (ImGui::RadioButton("Raw Contours", m_drawMode == DRAWMODE_RAW_CONTOURS, valid[DRAWMODE_RAW_CONTOURS]))
 		m_drawMode = DRAWMODE_RAW_CONTOURS;
-	if (imguiCheck("Both Contours", m_drawMode == DRAWMODE_BOTH_CONTOURS, valid[DRAWMODE_BOTH_CONTOURS]))
+	if (ImGui::RadioButton("Both Contours", m_drawMode == DRAWMODE_BOTH_CONTOURS, valid[DRAWMODE_BOTH_CONTOURS]))
 		m_drawMode = DRAWMODE_BOTH_CONTOURS;
-	if (imguiCheck("Contours", m_drawMode == DRAWMODE_CONTOURS, valid[DRAWMODE_CONTOURS]))
+	if (ImGui::RadioButton("Contours", m_drawMode == DRAWMODE_CONTOURS, valid[DRAWMODE_CONTOURS]))
 		m_drawMode = DRAWMODE_CONTOURS;
-	if (imguiCheck("Poly Mesh", m_drawMode == DRAWMODE_POLYMESH, valid[DRAWMODE_POLYMESH]))
+	if (ImGui::RadioButton("Poly Mesh", m_drawMode == DRAWMODE_POLYMESH, valid[DRAWMODE_POLYMESH]))
 		m_drawMode = DRAWMODE_POLYMESH;
-	if (imguiCheck("Poly Mesh Detail", m_drawMode == DRAWMODE_POLYMESH_DETAIL, valid[DRAWMODE_POLYMESH_DETAIL]))
+	if (ImGui::RadioButton("Poly Mesh Detail", m_drawMode == DRAWMODE_POLYMESH_DETAIL, valid[DRAWMODE_POLYMESH_DETAIL]))
 		m_drawMode = DRAWMODE_POLYMESH_DETAIL;
 		
 	if (unavail)
 	{
-		imguiValue("Tick 'Keep Itermediate Results'");
-		imguiValue("rebuild some tiles to see");
-		imguiValue("more debug mode options.");
+		ImGui::Text("Tick 'Keep Itermediate Results'");
+		ImGui::Text("rebuild some tiles to see");
+		ImGui::Text("more debug mode options.");
 	}
 }
 
@@ -557,7 +557,7 @@ void Sample_TileMesh::handleRenderOverlay(double* proj, double* model, int* view
 	{
 		char text[32];
 		snprintf(text,32,"%.3fms / %dTris / %.1fkB", m_tileBuildTime, m_tileTriCount, m_tileMemUsage);
-		imguiDrawText((int)x, (int)y-25, IMGUI_ALIGN_CENTER, text, imguiRGBA(0,0,0,220));
+		//imguiDrawText((int)x, (int)y-25, IMGUI_ALIGN_CENTER, text, imguiRGBA(0,0,0,220));
 	}
 	
 	if (m_tool)
