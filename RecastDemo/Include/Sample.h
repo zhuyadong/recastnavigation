@@ -132,6 +132,7 @@ protected:
 
 	SampleDebugDraw m_dd;
 	
+	char m_navMeshName[1024];
 	dtNavMesh* loadAll(const char* path);
 	void saveAll(const char* path, const dtNavMesh* mesh);
 

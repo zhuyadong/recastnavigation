@@ -22,6 +22,7 @@
 #include <string.h>
 #include <float.h>
 #include <vector>
+#include <imgui/imgui.h>
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "imgui.h"
@@ -217,12 +218,12 @@ void NavMeshPruneTool::handleMenu()
 	if (!nav) return;
 	if (!m_flags) return;
 
-	if (imguiButton("Clear Selection"))
+	if (ImGui::Button("Clear Selection"))
 	{
 		m_flags->clearAllFlags();
 	}
 	
-	if (imguiButton("Prune Unselected"))
+	if (ImGui::Button("Prune Unselected"))
 	{
 		disableUnvisitedPolys(nav, m_flags);
 		delete m_flags;

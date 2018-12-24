@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <float.h>
+#include <imgui/imgui.h>
 #include "SDL.h"
 #include "SDL_opengl.h"
 #include "imgui.h"
@@ -122,31 +123,26 @@ void ConvexVolumeTool::reset()
 
 void ConvexVolumeTool::handleMenu()
 {
-	imguiSlider("Shape Height", &m_boxHeight, 0.1f, 20.0f, 0.1f);
-	imguiSlider("Shape Descent", &m_boxDescent, 0.1f, 20.0f, 0.1f);
-	imguiSlider("Poly Offset", &m_polyOffset, 0.0f, 10.0f, 0.1f);
+	ImGui::SliderFloat("Shape Height", &m_boxHeight, 0.1f, 20.0f, "%.1f");
+	ImGui::SliderFloat("Shape Descent", &m_boxDescent, 0.1f, 20.0f, "%.1f");
+	ImGui::SliderFloat("Poly Offset", &m_polyOffset, 0.0f, 10.0f, "%.1f");
 
-	imguiSeparator();
 
-	imguiLabel("Area Type");
-	imguiIndent();
-	if (imguiCheck("Ground", m_areaType == SAMPLE_POLYAREA_GROUND))
+	ImGui::Text("Area Type");
+	if (ImGui::RadioButton("Ground", m_areaType == SAMPLE_POLYAREA_GROUND))
 		m_areaType = SAMPLE_POLYAREA_GROUND;
-	if (imguiCheck("Water", m_areaType == SAMPLE_POLYAREA_WATER))
+	if (ImGui::RadioButton("Water", m_areaType == SAMPLE_POLYAREA_WATER))
 		m_areaType = SAMPLE_POLYAREA_WATER;
-	if (imguiCheck("Road", m_areaType == SAMPLE_POLYAREA_ROAD))
+	if (ImGui::RadioButton("Road", m_areaType == SAMPLE_POLYAREA_ROAD))
 		m_areaType = SAMPLE_POLYAREA_ROAD;
-	if (imguiCheck("Door", m_areaType == SAMPLE_POLYAREA_DOOR))
+	if (ImGui::RadioButton("Door", m_areaType == SAMPLE_POLYAREA_DOOR))
 		m_areaType = SAMPLE_POLYAREA_DOOR;
-	if (imguiCheck("Grass", m_areaType == SAMPLE_POLYAREA_GRASS))
+	if (ImGui::RadioButton("Grass", m_areaType == SAMPLE_POLYAREA_GRASS))
 		m_areaType = SAMPLE_POLYAREA_GRASS;
-	if (imguiCheck("Jump", m_areaType == SAMPLE_POLYAREA_JUMP))
+	if (ImGui::RadioButton("Jump", m_areaType == SAMPLE_POLYAREA_JUMP))
 		m_areaType = SAMPLE_POLYAREA_JUMP;
-	imguiUnindent();
 
-	imguiSeparator();
-
-	if (imguiButton("Clear Shape"))
+	if (ImGui::Button("Clear Shape"))
 	{
 		m_npts = 0;
 		m_nhull = 0;

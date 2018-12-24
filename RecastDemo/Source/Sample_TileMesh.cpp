@@ -41,6 +41,7 @@
 #include "OffMeshConnectionTool.h"
 #include "ConvexVolumeTool.h"
 #include "CrowdTool.h"
+#include "Filelist.h"
 
 
 #ifdef WIN32
@@ -235,7 +236,10 @@ void Sample_TileMesh::handleSettings()
 		m_buildAll = !m_buildAll;
 	
 	ImGui::Text("Tiling");
-	ImGui::SliderFloat("TileSize", &m_tileSize, 16.0f, 1024.0f);
+	if (ImGui::SliderFloat("TileSize", &m_tileSize, 16.0f, 1024.0f, "%0.f"))
+	{
+		m_tileSize = int(m_tileSize) - int(m_tileSize) % 16;
+	}
 	
 	if (m_geom)
 	{
@@ -268,34 +272,58 @@ void Sample_TileMesh::handleSettings()
 		m_maxPolysPerTile = 0;
 	}
 	
-	ImGui::Separator();
-	
-	//imguiIndent();
-	//imguiIndent();
+	ImGui::Text("");
 	
 	if (ImGui::Button("Save"))
 	{
-		Sample::saveAll("all_tiles_navmesh.bin", m_navMesh);
+		ImGui::SameLine();
+		ImGui::InputText("", m_navMeshName, sizeof(m_navMeshName));
+		if (m_navMeshName[0] == 0)
+		{
+			Sample::saveAll("tile_navmesh.bin", m_navMesh);
+		}
+		else
+		{
+			std::string name = "tile_";
+			name += m_navMeshName;
+			name += ".bin";
+			Sample::saveAll(name.c_str(), m_navMesh);
+		}
+	}
+	else
+	{
+		ImGui::SameLine();
+		ImGui::InputText("", m_navMeshName, sizeof(m_navMeshName));
 	}
 
 	if (ImGui::Button("Load"))
+		ImGui::OpenPopup("Load");
+	if (ImGui::BeginPopup("Load"))
 	{
-		dtFreeNavMesh(m_navMesh);
-		m_navMesh = Sample::loadAll("all_tiles_navmesh.bin");
-		m_navQuery->init(m_navMesh, 2048);
+		std::vector<std::string> files;
+		scanDirectory(".", ".bin", files);
+		for (auto it = files.begin(); it != files.end(); ++it)
+		{
+			if (it->find_first_of("tile_", 0) == 0)
+			{
+				if (ImGui::Selectable(it->c_str()))
+				{
+					dtFreeNavMesh(m_navMesh);
+					m_navMesh = Sample::loadAll(it->c_str());
+					m_navQuery->init(m_navMesh, 2048);
+					std::string name = it->substr(5, it->length() - 9);
+					snprintf(m_navMeshName, sizeof(m_navMeshName), "%s", name.c_str());
+				}
+			}
+		}
+		ImGui::EndPopup();
 	}
-
-	//imguiUnindent();
-	//imguiUnindent();
 	
 	char msg[64];
 	snprintf(msg, 64, "Build Time: %.1fms", m_totalBuildTimeMs);
 	ImGui::Text(msg);
 	
-	ImGui::Separator();
-	
-	ImGui::Separator();
-	
+	ImGui::Text("");
 }
 
 void Sample_TileMesh::handleTools()
@@ -374,41 +402,41 @@ void Sample_TileMesh::handleDebugMode()
 		return;
 	
 	ImGui::Text("Draw");
-	if (ImGui::RadioButton("Input Mesh", m_drawMode == DRAWMODE_MESH, valid[DRAWMODE_MESH]))
+	if (valid[DRAWMODE_MESH] && ImGui::RadioButton("Input Mesh", m_drawMode == DRAWMODE_MESH))
 		m_drawMode = DRAWMODE_MESH;
-	if (ImGui::RadioButton("Navmesh", m_drawMode == DRAWMODE_NAVMESH, valid[DRAWMODE_NAVMESH]))
+	if (valid[DRAWMODE_NAVMESH] && ImGui::RadioButton("Navmesh", m_drawMode == DRAWMODE_NAVMESH))
 		m_drawMode = DRAWMODE_NAVMESH;
-	if (ImGui::RadioButton("Navmesh Invis", m_drawMode == DRAWMODE_NAVMESH_INVIS, valid[DRAWMODE_NAVMESH_INVIS]))
+	if (valid[DRAWMODE_NAVMESH_INVIS] && ImGui::RadioButton("Navmesh Invis", m_drawMode == DRAWMODE_NAVMESH_INVIS))
 		m_drawMode = DRAWMODE_NAVMESH_INVIS;
-	if (ImGui::RadioButton("Navmesh Trans", m_drawMode == DRAWMODE_NAVMESH_TRANS, valid[DRAWMODE_NAVMESH_TRANS]))
+	if (valid[DRAWMODE_NAVMESH_TRANS] &&ImGui::RadioButton("Navmesh Trans", m_drawMode == DRAWMODE_NAVMESH_TRANS))
 		m_drawMode = DRAWMODE_NAVMESH_TRANS;
-	if (ImGui::RadioButton("Navmesh BVTree", m_drawMode == DRAWMODE_NAVMESH_BVTREE, valid[DRAWMODE_NAVMESH_BVTREE]))
+	if (valid[DRAWMODE_NAVMESH_BVTREE] && ImGui::RadioButton("Navmesh BVTree", m_drawMode == DRAWMODE_NAVMESH_BVTREE))
 		m_drawMode = DRAWMODE_NAVMESH_BVTREE;
-	if (ImGui::RadioButton("Navmesh Nodes", m_drawMode == DRAWMODE_NAVMESH_NODES, valid[DRAWMODE_NAVMESH_NODES]))
+	if (valid[DRAWMODE_NAVMESH_NODES] && ImGui::RadioButton("Navmesh Nodes", m_drawMode == DRAWMODE_NAVMESH_NODES))
 		m_drawMode = DRAWMODE_NAVMESH_NODES;
-	if (ImGui::RadioButton("Navmesh Portals", m_drawMode == DRAWMODE_NAVMESH_PORTALS, valid[DRAWMODE_NAVMESH_PORTALS]))
+	if (valid[DRAWMODE_NAVMESH_PORTALS] && ImGui::RadioButton("Navmesh Portals", m_drawMode == DRAWMODE_NAVMESH_PORTALS))
 		m_drawMode = DRAWMODE_NAVMESH_PORTALS;
-	if (ImGui::RadioButton("Voxels", m_drawMode == DRAWMODE_VOXELS, valid[DRAWMODE_VOXELS]))
+	if (valid[DRAWMODE_VOXELS] && ImGui::RadioButton("Voxels", m_drawMode == DRAWMODE_VOXELS))
 		m_drawMode = DRAWMODE_VOXELS;
-	if (ImGui::RadioButton("Walkable Voxels", m_drawMode == DRAWMODE_VOXELS_WALKABLE, valid[DRAWMODE_VOXELS_WALKABLE]))
+	if (valid[DRAWMODE_VOXELS_WALKABLE] && ImGui::RadioButton("Walkable Voxels", m_drawMode == DRAWMODE_VOXELS_WALKABLE))
 		m_drawMode = DRAWMODE_VOXELS_WALKABLE;
-	if (ImGui::RadioButton("Compact", m_drawMode == DRAWMODE_COMPACT, valid[DRAWMODE_COMPACT]))
+	if (valid[DRAWMODE_COMPACT] && ImGui::RadioButton("Compact", m_drawMode == DRAWMODE_COMPACT))
 		m_drawMode = DRAWMODE_COMPACT;
-	if (ImGui::RadioButton("Compact Distance", m_drawMode == DRAWMODE_COMPACT_DISTANCE, valid[DRAWMODE_COMPACT_DISTANCE]))
+	if (valid[DRAWMODE_COMPACT_DISTANCE] && ImGui::RadioButton("Compact Distance", m_drawMode == DRAWMODE_COMPACT_DISTANCE))
 		m_drawMode = DRAWMODE_COMPACT_DISTANCE;
-	if (ImGui::RadioButton("Compact Regions", m_drawMode == DRAWMODE_COMPACT_REGIONS, valid[DRAWMODE_COMPACT_REGIONS]))
+	if (valid[DRAWMODE_COMPACT_REGIONS] && ImGui::RadioButton("Compact Regions", m_drawMode == DRAWMODE_COMPACT_REGIONS))
 		m_drawMode = DRAWMODE_COMPACT_REGIONS;
-	if (ImGui::RadioButton("Region Connections", m_drawMode == DRAWMODE_REGION_CONNECTIONS, valid[DRAWMODE_REGION_CONNECTIONS]))
+	if (valid[DRAWMODE_REGION_CONNECTIONS] && ImGui::RadioButton("Region Connections", m_drawMode == DRAWMODE_REGION_CONNECTIONS))
 		m_drawMode = DRAWMODE_REGION_CONNECTIONS;
-	if (ImGui::RadioButton("Raw Contours", m_drawMode == DRAWMODE_RAW_CONTOURS, valid[DRAWMODE_RAW_CONTOURS]))
+	if (valid[DRAWMODE_RAW_CONTOURS] && ImGui::RadioButton("Raw Contours", m_drawMode == DRAWMODE_RAW_CONTOURS))
 		m_drawMode = DRAWMODE_RAW_CONTOURS;
-	if (ImGui::RadioButton("Both Contours", m_drawMode == DRAWMODE_BOTH_CONTOURS, valid[DRAWMODE_BOTH_CONTOURS]))
+	if (valid[DRAWMODE_BOTH_CONTOURS] && ImGui::RadioButton("Both Contours", m_drawMode == DRAWMODE_BOTH_CONTOURS))
 		m_drawMode = DRAWMODE_BOTH_CONTOURS;
-	if (ImGui::RadioButton("Contours", m_drawMode == DRAWMODE_CONTOURS, valid[DRAWMODE_CONTOURS]))
+	if (valid[DRAWMODE_CONTOURS] && ImGui::RadioButton("Contours", m_drawMode == DRAWMODE_CONTOURS))
 		m_drawMode = DRAWMODE_CONTOURS;
-	if (ImGui::RadioButton("Poly Mesh", m_drawMode == DRAWMODE_POLYMESH, valid[DRAWMODE_POLYMESH]))
+	if (valid[DRAWMODE_POLYMESH] && ImGui::RadioButton("Poly Mesh", m_drawMode == DRAWMODE_POLYMESH))
 		m_drawMode = DRAWMODE_POLYMESH;
-	if (ImGui::RadioButton("Poly Mesh Detail", m_drawMode == DRAWMODE_POLYMESH_DETAIL, valid[DRAWMODE_POLYMESH_DETAIL]))
+	if (valid[DRAWMODE_POLYMESH_DETAIL] && ImGui::RadioButton("Poly Mesh Detail", m_drawMode == DRAWMODE_POLYMESH_DETAIL))
 		m_drawMode = DRAWMODE_POLYMESH_DETAIL;
 		
 	if (unavail)

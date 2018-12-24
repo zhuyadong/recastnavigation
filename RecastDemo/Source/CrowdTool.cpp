@@ -21,6 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <float.h>
+#include <imgui/imgui.h>
 #include "SDL.h"
 #include "SDL_opengl.h"
 #ifdef __APPLE__
@@ -894,39 +895,35 @@ void CrowdTool::handleMenu()
 		return;
 	CrowdToolParams* params = m_state->getToolParams();
 
-	if (imguiCheck("Create Agents", m_mode == TOOLMODE_CREATE))
+	if (ImGui::RadioButton("Create Agents", m_mode == TOOLMODE_CREATE))
 		m_mode = TOOLMODE_CREATE;
-	if (imguiCheck("Move Target", m_mode == TOOLMODE_MOVE_TARGET))
+	if (ImGui::RadioButton("Move Target", m_mode == TOOLMODE_MOVE_TARGET))
 		m_mode = TOOLMODE_MOVE_TARGET;
-	if (imguiCheck("Select Agent", m_mode == TOOLMODE_SELECT))
+	if (ImGui::RadioButton("Select Agent", m_mode == TOOLMODE_SELECT))
 		m_mode = TOOLMODE_SELECT;
-	if (imguiCheck("Toggle Polys", m_mode == TOOLMODE_TOGGLE_POLYS))
+	if (ImGui::RadioButton("Toggle Polys", m_mode == TOOLMODE_TOGGLE_POLYS))
 		m_mode = TOOLMODE_TOGGLE_POLYS;
 	
-	imguiSeparatorLine();
+	ImGui::Separator();
 		
-	if (imguiCollapse("Options", 0, params->m_expandOptions))
-		params->m_expandOptions = !params->m_expandOptions;
-	
-	if (params->m_expandOptions)
+	if (ImGui::CollapsingHeader("Options"))
 	{
-		imguiIndent();
-		if (imguiCheck("Optimize Visibility", params->m_optimizeVis))
+		if (ImGui::RadioButton("Optimize Visibility", params->m_optimizeVis))
 		{
 			params->m_optimizeVis = !params->m_optimizeVis;
 			m_state->updateAgentParams();
 		}
-		if (imguiCheck("Optimize Topology", params->m_optimizeTopo))
+		if (ImGui::RadioButton("Optimize Topology", params->m_optimizeTopo))
 		{
 			params->m_optimizeTopo = !params->m_optimizeTopo;
 			m_state->updateAgentParams();
 		}
-		if (imguiCheck("Anticipate Turns", params->m_anticipateTurns))
+		if (ImGui::RadioButton("Anticipate Turns", params->m_anticipateTurns))
 		{
 			params->m_anticipateTurns = !params->m_anticipateTurns;
 			m_state->updateAgentParams();
 		}
-		if (imguiCheck("Obstacle Avoidance", params->m_obstacleAvoidance))
+		if (ImGui::RadioButton("Obstacle Avoidance", params->m_obstacleAvoidance))
 		{
 			params->m_obstacleAvoidance = !params->m_obstacleAvoidance;
 			m_state->updateAgentParams();
@@ -935,7 +932,7 @@ void CrowdTool::handleMenu()
 		{
 			m_state->updateAgentParams();
 		}
-		if (imguiCheck("Separation", params->m_separation))
+		if (ImGui::RadioButton("Separation", params->m_separation))
 		{
 			params->m_separation = !params->m_separation;
 			m_state->updateAgentParams();
@@ -944,48 +941,37 @@ void CrowdTool::handleMenu()
 		{
 			m_state->updateAgentParams();
 		}
-		
-		imguiUnindent();
 	}
-
-	if (imguiCollapse("Selected Debug Draw", 0, params->m_expandSelectedDebugDraw))
-		params->m_expandSelectedDebugDraw = !params->m_expandSelectedDebugDraw;
 		
-	if (params->m_expandSelectedDebugDraw)
-	{
+	if (ImGui::CollapsingHeader("Selected Debug Draw"))
+	{		
 		imguiIndent();
-		if (imguiCheck("Show Corners", params->m_showCorners))
+		if (ImGui::RadioButton("Show Corners", params->m_showCorners))
 			params->m_showCorners = !params->m_showCorners;
-		if (imguiCheck("Show Collision Segs", params->m_showCollisionSegments))
+		if (ImGui::RadioButton("Show Collision Segs", params->m_showCollisionSegments))
 			params->m_showCollisionSegments = !params->m_showCollisionSegments;
-		if (imguiCheck("Show Path", params->m_showPath))
+		if (ImGui::RadioButton("Show Path", params->m_showPath))
 			params->m_showPath = !params->m_showPath;
-		if (imguiCheck("Show VO", params->m_showVO))
+		if (ImGui::RadioButton("Show VO", params->m_showVO))
 			params->m_showVO = !params->m_showVO;
-		if (imguiCheck("Show Path Optimization", params->m_showOpt))
+		if (ImGui::RadioButton("Show Path Optimization", params->m_showOpt))
 			params->m_showOpt = !params->m_showOpt;
-		if (imguiCheck("Show Neighbours", params->m_showNeis))
+		if (ImGui::RadioButton("Show Neighbours", params->m_showNeis))
 			params->m_showNeis = !params->m_showNeis;
-		imguiUnindent();
 	}
 		
-	if (imguiCollapse("Debug Draw", 0, params->m_expandDebugDraw))
-		params->m_expandDebugDraw = !params->m_expandDebugDraw;
-	
-	if (params->m_expandDebugDraw)
+	if (ImGui::CollapsingHeader("Debug Draw"))
 	{
-		imguiIndent();
-		if (imguiCheck("Show Labels", params->m_showLabels))
+		if (ImGui::RadioButton("Show Labels", params->m_showLabels))
 			params->m_showLabels = !params->m_showLabels;
-		if (imguiCheck("Show Prox Grid", params->m_showGrid))
+		if (ImGui::RadioButton("Show Prox Grid", params->m_showGrid))
 			params->m_showGrid = !params->m_showGrid;
-		if (imguiCheck("Show Nodes", params->m_showNodes))
+		if (ImGui::RadioButton("Show Nodes", params->m_showNodes))
 			params->m_showNodes = !params->m_showNodes;
-		if (imguiCheck("Show Perf Graph", params->m_showPerfGraph))
+		if (ImGui::RadioButton("Show Perf Graph", params->m_showPerfGraph))
 			params->m_showPerfGraph = !params->m_showPerfGraph;
-		if (imguiCheck("Show Detail All", params->m_showDetailAll))
+		if (ImGui::RadioButton("Show Detail All", params->m_showDetailAll))
 			params->m_showDetailAll = !params->m_showDetailAll;
-		imguiUnindent();
 	}
 }
 
