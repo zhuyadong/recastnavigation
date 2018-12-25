@@ -143,6 +143,9 @@ int main(int /*argc*/, char** /*argv*/)
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
 
+	//ImFont* font1 = io.Fonts->AddFontFromFileTTF("DroidSans.ttf", 15);
+	ImFont* font1 = io.Fonts->AddFontFromFileTTF("wqy-microhei.ttc", 15, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+
 	// Setup Platform/Renderer bindings
 	ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
 	ImGui_ImplOpenGL2_Init();
@@ -533,6 +536,9 @@ int main(int /*argc*/, char** /*argv*/)
 		ImGui_ImplSDL2_NewFrame(window);
 		ImGui::NewFrame();
 
+		ImGui::PushFont(font1);
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 5.0f);
+
 		if (sample)
 		{
 			sample->handleRenderOverlay((double*)projectionMatrix, (double*)modelviewMatrix, (int*)viewport);
@@ -879,6 +885,9 @@ int main(int /*argc*/, char** /*argv*/)
 			glLineWidth(1.0f);
 		}
 
+
+		ImGui::PopFont();
+		ImGui::PopStyleVar(1);
 
 		imguiEndFrame();
 		imguiRenderGLDraw();
