@@ -19,6 +19,8 @@
 #ifndef DEBUGDRAW_H
 #define DEBUGDRAW_H
 
+#include <vector>
+
 // Some math headers don't have PI defined.
 static const float DU_PI = 3.14159265f;
 
@@ -190,10 +192,15 @@ void duAppendCylinder(struct duDebugDraw* dd, float minx, float miny, float minz
 					  float maxx, float maxy, float maxz, unsigned int col);
 
 
-class duDisplayList
+class duDisplayList : public duDebugDraw
 {
 	float* m_pos;
 	unsigned int* m_color;
+	struct uvinfo {
+		bool enable;
+		float uv[2];
+		uvinfo() : enable(false){}
+	} *m_uv;
 	int m_size;
 	int m_cap;
 
@@ -207,17 +214,76 @@ public:
 	duDisplayList(int cap = 512);
 	~duDisplayList();
 	virtual void depthMask(bool state);
+	virtual void texture(bool state) {}
 	virtual void begin(duDebugDrawPrimitives prim, float size = 1.0f);
 	virtual void vertex(const float x, const float y, const float z, unsigned int color);
+	virtual void vertex(const float x, const float y, const float z, unsigned int color, const float u, const float v);
 	virtual void vertex(const float* pos, unsigned int color);
+	virtual void vertex(const float* pos, unsigned int color, const float* uv);
 	virtual void end();
 	void clear();
 	void draw(struct duDebugDraw* dd);
 private:
 	// Explicitly disabled copy constructor and copy assignment operator.
-	//duDisplayList(const duDisplayList&);
-	//duDisplayList& operator=(const duDisplayList&);
+	duDisplayList(const duDisplayList&);
+	duDisplayList& operator=(const duDisplayList&);
 };
 
+class duDisplayListCache : public duDebugDraw
+{
+	std::vector<duDisplayList*> ddlist;
+public:
+	virtual ~duDisplayListCache() {
+		clear();
+	}
+	void begin(duDebugDrawPrimitives prim, float size) {
+		ddlist.push_back(new duDisplayList());
+		(*ddlist.rbegin())->begin(prim, size);
+	}
+	void depthMask(bool state) {
+		if (!ddlist.empty()) {
+			(*ddlist.rbegin())->depthMask(state);
+		}
+	}
+	void texture(bool state) {
+	}
+	void vertex(const float x, const float y, const float z, unsigned int color) {
+		if (!ddlist.empty()) {
+			(*ddlist.rbegin())->vertex(x, y, z, color);
+		}
+	}
+	void vertex(const float x, const float y, const float z, unsigned int color, const float u, const float v) {
+		if (!ddlist.empty()) {
+			(*ddlist.rbegin())->vertex(x, y, z, color, u, v);
+		}
+	}
+	void vertex(const float* pos, unsigned int color) {
+		if (!ddlist.empty()) {
+			(*ddlist.rbegin())->vertex(pos, color);
+		}
+	}
+	void vertex(const float* pos, unsigned int color, const float* uv) {
+		if (!ddlist.empty()) {
+			(*ddlist.rbegin())->vertex(pos, color, uv);
+		}
+	}
+	void end() {
+		if (!ddlist.empty()) {
+			(*ddlist.rbegin())->end();
+		}
+	}
+	void clear() {
+		for (auto it = ddlist.begin(); it != ddlist.end(); ++it) {
+			delete *it;
+		}
+		ddlist.clear();
+	}
+	void draw(struct duDebugDraw* dd) {
+		for (auto it = ddlist.begin(); it != ddlist.end(); ++it) {
+			(*it)->draw(dd);
+		}
+	}
+	duDisplayList* top() { return *ddlist.rbegin(); }
+};
 
 #endif // DEBUGDRAW_H

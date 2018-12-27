@@ -528,6 +528,7 @@ void duAppendCross(struct duDebugDraw* dd, const float x, const float y, const f
 duDisplayList::duDisplayList(int cap) :
 	m_pos(0),
 	m_color(0),
+	m_uv(0),
 	m_size(0),
 	m_cap(0),
 	m_depthMask(true),
@@ -543,6 +544,7 @@ duDisplayList::~duDisplayList()
 {
 	delete [] m_pos;
 	delete [] m_color;
+	delete [] m_uv;
 }
 
 void duDisplayList::resize(int cap)
@@ -559,6 +561,12 @@ void duDisplayList::resize(int cap)
 	delete [] m_color;
 	m_color = newColor;
 	
+	uvinfo* newUv = new uvinfo[cap];
+	if (m_size)
+		memcpy(newUv, m_uv, sizeof(uvinfo)*m_size);
+	delete[] m_uv;
+	m_uv = newUv;
+
 	m_cap = cap;
 }
 
@@ -591,10 +599,29 @@ void duDisplayList::vertex(const float x, const float y, const float z, unsigned
 	m_size++;
 }
 
+void duDisplayList::vertex(const float x, const float y, const float z, unsigned int color, const float u, const float v)
+{
+	vertex(x, y, z, color);
+	uvinfo& info = m_uv[m_size - 1];
+	info.enable = true;
+	info.uv[0] = u;
+	info.uv[1] = v;
+}
+
 void duDisplayList::vertex(const float* pos, unsigned int color)
 {
 	vertex(pos[0],pos[1],pos[2],color);
 }
+
+void duDisplayList::vertex(const float* pos, unsigned int color, const float* uv)
+{
+	vertex(pos[0],pos[1],pos[2],color);
+	uvinfo& info = m_uv[m_size - 1];
+	info.enable = true;
+	info.uv[0] = uv[0];
+	info.uv[1] = uv[1];
+}
+
 
 void duDisplayList::end()
 {
@@ -606,7 +633,13 @@ void duDisplayList::draw(struct duDebugDraw* dd)
 	if (!m_size) return;
 	dd->depthMask(m_depthMask);
 	dd->begin(m_prim, m_primSize);
-	for (int i = 0; i < m_size; ++i)
-		dd->vertex(&m_pos[i*3], m_color[i]);
+	for (int i = 0; i < m_size; ++i) {
+		if (m_uv[i].enable) {
+			dd->vertex(&m_pos[i * 3], m_color[i], m_uv[i].uv);
+		}
+		else {
+			dd->vertex(&m_pos[i * 3], m_color[i]);
+		}
+	}
 	dd->end();
 }

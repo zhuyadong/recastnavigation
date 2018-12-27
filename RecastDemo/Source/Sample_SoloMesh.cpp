@@ -368,7 +368,7 @@ void Sample_SoloMesh::handleRender()
 	
 #ifndef NDEBUG
 	if (m_drawDebugHF && m_solid) {
-		m_solid->draw(&m_dd);
+		m_solid->ddcache.draw(&m_dd);
 	}
 #endif
 
