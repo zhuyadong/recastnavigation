@@ -19,6 +19,11 @@
 #ifndef RECAST_H
 #define RECAST_H
 
+#ifndef NDEBUG
+#include <vector>
+#include "DebugDraw.h"
+#endif
+
 /// The value of PI used by Recast.
 static const float RC_PI = 3.14159265f;
 
@@ -305,6 +310,42 @@ struct rcHeightfield
 	rcSpan** spans;		///< Heightfield of spans (width*height).
 	rcSpanPool* pools;	///< Linked list of span pools.
 	rcSpan* freelist;	///< The next free span.
+
+#ifndef NDEBUG
+	std::vector<duDisplayList> ddlist;
+	void begin(duDebugDrawPrimitives prim, float size) {
+		ddlist.push_back(duDisplayList());
+		ddlist.rbegin()->begin(prim, size);
+	}
+	void depthMask(bool state) {
+		if (!ddlist.empty()) {
+			ddlist.rbegin()->depthMask(state);
+		}
+	}
+	void vertex(const float x, const float y, const float z, unsigned int color) {
+		if (!ddlist.empty()) {
+			ddlist.rbegin()->vertex(x, y, z, color);
+		}
+	}
+	void vertex(const float* pos, unsigned int color) {
+		if (!ddlist.empty()) {
+			ddlist.rbegin()->vertex(pos, color);
+		}
+	}
+	void end() {
+		if (!ddlist.empty()) {
+			ddlist.rbegin()->end();
+		}
+	}
+	void clear() {
+		ddlist.clear();
+	}
+	void draw(struct duDebugDraw* dd) {
+		for (auto it = ddlist.begin(); it != ddlist.end(); ++it) {
+			it->draw(dd);
+		}
+	}
+#endif
 
 private:
 	// Explicitly-disabled copy constructor and copy assignment operator.

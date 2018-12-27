@@ -190,7 +190,7 @@ void duAppendCylinder(struct duDebugDraw* dd, float minx, float miny, float minz
 					  float maxx, float maxy, float maxz, unsigned int col);
 
 
-class duDisplayList : public duDebugDraw
+class duDisplayList
 {
 	float* m_pos;
 	unsigned int* m_color;
@@ -215,8 +215,8 @@ public:
 	void draw(struct duDebugDraw* dd);
 private:
 	// Explicitly disabled copy constructor and copy assignment operator.
-	duDisplayList(const duDisplayList&);
-	duDisplayList& operator=(const duDisplayList&);
+	//duDisplayList(const duDisplayList&);
+	//duDisplayList& operator=(const duDisplayList&);
 };
 
 

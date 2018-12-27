@@ -19,6 +19,10 @@ include_directories(../DetourTileCache/Include)
 include_directories(../Recast/Include)
 include_directories(Include)
 
+if (MSVC)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /source-charset:utf-8")
+endif()
+
 if (WIN32)
     add_executable(RecastDemo WIN32 ${SOURCES})
 elseif(APPLE)

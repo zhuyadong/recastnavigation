@@ -54,6 +54,9 @@ Sample_SoloMesh::Sample_SoloMesh() :
 	m_cset(0),
 	m_pmesh(0),
 	m_dmesh(0),
+#ifndef NDEBUG
+	m_drawDebugHF(false),
+#endif
 	m_drawMode(DRAWMODE_NAVMESH)
 {
 	setTool(new NavMeshTesterTool);
@@ -244,6 +247,11 @@ void Sample_SoloMesh::handleDebugMode()
 	if (valid[DRAWMODE_POLYMESH_DETAIL] && ImGui::RadioButton("Poly Mesh Detail", m_drawMode == DRAWMODE_POLYMESH_DETAIL))
 		m_drawMode = DRAWMODE_POLYMESH_DETAIL;
 		
+#ifndef NDEBUG
+	if (m_solid)
+		ImGui::Checkbox("HeightField Debug", &m_drawDebugHF);
+#endif
+
 	if (unavail)
 	{
 		ImGui::Text("Tick 'Keep Itermediate Results'");
@@ -358,6 +366,12 @@ void Sample_SoloMesh::handleRender()
 		glDepthMask(GL_TRUE);
 	}
 	
+#ifndef NDEBUG
+	if (m_drawDebugHF && m_solid) {
+		m_solid->draw(&m_dd);
+	}
+#endif
+
 	m_geom->drawConvexVolumes(&m_dd);
 
 	if (m_tool)

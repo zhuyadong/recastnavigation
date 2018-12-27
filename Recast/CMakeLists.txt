@@ -1,5 +1,6 @@
 file(GLOB SOURCES Source/*.cpp)
 
+include_directories(../DebugUtils/Include)
 include_directories(Include)
 
 if (RECASTNAVIGATION_STATIC)

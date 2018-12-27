@@ -60,6 +60,9 @@ protected:
 	};
 	
 	DrawMode m_drawMode;
+#ifndef NDEBUG
+	bool m_drawDebugHF;
+#endif
 	
 	void cleanup();
 

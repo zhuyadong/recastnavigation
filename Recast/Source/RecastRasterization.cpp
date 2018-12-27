@@ -276,6 +276,10 @@ static bool rasterizeTri(const float* v0, const float* v1, const float* v2,
 	rcVcopy(&in[2*3], v2);
 	int nvrow, nvIn = 3;
 	
+#ifndef NDEBUG
+	auto color = duRGBA(255, 0, 0, 200);
+	hf.begin(DU_DRAW_POINTS, 1.f);
+#endif
 	for (int y = y0; y <= y1; ++y)
 	{
 		// Clip polygon to row. Store the remaining polygon as well
@@ -290,6 +294,9 @@ static bool rasterizeTri(const float* v0, const float* v1, const float* v2,
 		{
 			if (minX > inrow[i*3])	minX = inrow[i*3];
 			if (maxX < inrow[i*3])	maxX = inrow[i*3];
+#ifndef NDEBUG
+			hf.vertex(&inrow[i * 3], color);
+#endif
 		}
 		int x0 = (int)((minX - bmin[0])*ics);
 		int x1 = (int)((maxX - bmin[0])*ics);
@@ -331,6 +338,9 @@ static bool rasterizeTri(const float* v0, const float* v1, const float* v2,
 		}
 	}
 
+#ifndef NDEBUG
+	hf.end();
+#endif
 	return true;
 }
 
