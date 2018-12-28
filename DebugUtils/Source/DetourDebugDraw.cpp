@@ -462,7 +462,6 @@ void duDebugDrawNavMeshPoly(duDebugDraw* dd, const dtNavMesh& mesh, dtPolyRef re
 	}
 	else
 	{
-		/*
 		const dtPolyDetail* pd = &tile->detailMeshes[ip];
 
 		dd->begin(DU_DRAW_TRIS);
@@ -478,7 +477,7 @@ void duDebugDrawNavMeshPoly(duDebugDraw* dd, const dtNavMesh& mesh, dtPolyRef re
 			}
 		}
 		dd->end();
-		*/
+		/*
 		dd->begin(DU_DRAW_LINES);
 		for (int i = 0, j = poly->vertCount - 1; i < poly->vertCount; j = i++) {
 			float *v0 = &tile->verts[poly->verts[i] * 3];
@@ -487,6 +486,7 @@ void duDebugDrawNavMeshPoly(duDebugDraw* dd, const dtNavMesh& mesh, dtPolyRef re
 			dd->vertex(v1, duRGBA(255, 0, 0, 255));
 		}
 		dd->end();
+		*/
 	}
 	
 	dd->depthMask(true);
