@@ -23,9 +23,9 @@
 #include "SDL.h"
 #include "SDL_opengl.h"
 #ifdef __APPLE__
-#	include <OpenGL/glu.h>
+#include <OpenGL/glu.h>
 #else
-#	include <GL/glu.h>
+#include <GL/glu.h>
 #endif
 
 #include <vector>
@@ -49,8 +49,8 @@
 #include "imgui_impl_opengl2.h"
 
 #ifdef WIN32
-#	define snprintf _snprintf
-#	define putenv _putenv
+#define snprintf _snprintf
+#define putenv _putenv
 #endif
 
 using std::string;
@@ -58,22 +58,22 @@ using std::vector;
 
 struct SampleItem
 {
-	Sample* (*create)();
+	Sample *(*create)();
 	const string name;
 };
-Sample* createSolo() { return new Sample_SoloMesh(); }
-Sample* createTile() { return new Sample_TileMesh(); }
-Sample* createTempObstacle() { return new Sample_TempObstacles(); }
-Sample* createDebug() { return new Sample_Debug(); }
+Sample *createSolo() { return new Sample_SoloMesh(); }
+Sample *createTile() { return new Sample_TileMesh(); }
+Sample *createTempObstacle() { return new Sample_TempObstacles(); }
+Sample *createDebug() { return new Sample_Debug(); }
 static SampleItem g_samples[] =
-{
-	{ createSolo, "Solo Mesh" },
-	{ createTile, "Tile Mesh" },
-	{ createTempObstacle, "Temp Obstacles" },
+	{
+		{createSolo, "Solo Mesh"},
+		{createTile, "Tile Mesh"},
+		{createTempObstacle, "Temp Obstacles"},
 };
 static const int g_nsamples = sizeof(g_samples) / sizeof(SampleItem);
 
-int main(int /*argc*/, char** /*argv*/)
+int main(int /*argc*/, char ** /*argv*/)
 {
 	// Init SDL
 	if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -103,7 +103,7 @@ int main(int /*argc*/, char** /*argv*/)
 	SDL_GetCurrentDisplayMode(0, &displayMode);
 
 	bool presentationMode = false;
-	Uint32 flags = SDL_WINDOW_OPENGL;
+	Uint32 flags = SDL_WINDOW_OPENGL | SDL_WINDOW_ALLOW_HIGHDPI;
 	int width;
 	int height;
 	if (presentationMode)
@@ -120,8 +120,8 @@ int main(int /*argc*/, char** /*argv*/)
 		height = displayMode.h - 80;
 	}
 
-	SDL_Window* window;
-	SDL_Renderer* renderer;
+	SDL_Window *window;
+	SDL_Renderer *renderer;
 	int errorCode = SDL_CreateWindowAndRenderer(width, height, flags, &window, &renderer);
 
 	if (errorCode != 0 || !window || !renderer)
@@ -133,18 +133,21 @@ int main(int /*argc*/, char** /*argv*/)
 	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 
+	SDL_GL_GetDrawableSize(window, &width, &height);
+
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO(); (void)io;
+	ImGuiIO &io = ImGui::GetIO();
+	(void)io;
 	//io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;  // Enable Keyboard Controls
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
 	//ImGui::StyleColorsClassic();
 
-	//ImFont* font1 = io.Fonts->AddFontFromFileTTF("DroidSans.ttf", 15);
-	ImFont* font1 = io.Fonts->AddFontFromFileTTF("wqy-microhei.ttc", 15, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
+	//ImFont *font1 = io.Fonts->AddFontFromFileTTF("DroidSans.ttf", 15);
+	ImFont *font1 = io.Fonts->AddFontFromFileTTF("wqy-microhei.ttc", 15, NULL, io.Fonts->GetGlyphRangesChineseSimplifiedCommon());
 
 	// Setup Platform/Renderer bindings
 	ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
@@ -160,13 +163,13 @@ int main(int /*argc*/, char** /*argv*/)
 	float t = 0.0f;
 	float timeAcc = 0.0f;
 	Uint32 prevFrameTime = SDL_GetTicks();
-	int mousePos[2] = { 0, 0 };
-	int origMousePos[2] = { 0, 0 }; // Used to compute mouse movement totals across frames.
+	int mousePos[2] = {0, 0};
+	int origMousePos[2] = {0, 0}; // Used to compute mouse movement totals across frames.
 
-	float cameraEulers[] = { 45, -45 };
-	float cameraPos[] = { 0, 0, 0 };
+	float cameraEulers[] = {45, -45};
+	float cameraPos[] = {0, 0, 0};
 	float camr = 1000;
-	float origCameraEulers[] = { 0, 0 }; // Used to compute rotational changes across frames.
+	float origCameraEulers[] = {0, 0}; // Used to compute rotational changes across frames.
 
 	float moveFront = 0.0f, moveBack = 0.0f, moveLeft = 0.0f, moveRight = 0.0f, moveUp = 0.0f, moveDown = 0.0f;
 
@@ -195,19 +198,19 @@ int main(int /*argc*/, char** /*argv*/)
 	const string meshesFolder = "Meshes";
 	string meshName = "Choose Mesh...";
 
-	float markerPosition[3] = { 0, 0, 0 };
+	float markerPosition[3] = {0, 0, 0};
 	bool markerPositionSet = false;
 
-	InputGeom* geom = 0;
-	Sample* sample = 0;
+	InputGeom *geom = 0;
+	Sample *sample = 0;
 
 	const string testCasesFolder = "TestCases";
-	TestCase* test = 0;
+	TestCase *test = 0;
 
 	BuildContext ctx;
 
 	// Fog.
-	float fogColor[4] = { 0.32f, 0.31f, 0.30f, 1.0f };
+	float fogColor[4] = {0.32f, 0.31f, 0.30f, 1.0f};
 	glEnable(GL_FOG);
 	glFogi(GL_FOG_MODE, GL_LINEAR);
 	glFogf(GL_FOG_START, camr * 0.1f);
@@ -437,8 +440,10 @@ int main(int /*argc*/, char** /*argv*/)
 		if (dt < MIN_FRAME_TIME)
 		{
 			int ms = (int)((MIN_FRAME_TIME - dt) * 1000.0f);
-			if (ms > 10) ms = 10;
-			if (ms >= 0) SDL_Delay(ms);
+			if (ms > 10)
+				ms = 10;
+			if (ms >= 0)
+				SDL_Delay(ms);
 		}
 
 		// Set the viewport.
@@ -482,7 +487,7 @@ int main(int /*argc*/, char** /*argv*/)
 		rayEnd[2] = (float)z;
 
 		// Handle keyboard movement.
-		const Uint8* keystate = SDL_GetKeyboardState(NULL);
+		const Uint8 *keystate = SDL_GetKeyboardState(NULL);
 		moveFront = rcClamp(moveFront + dt * 4 * ((keystate[SDL_SCANCODE_W] || keystate[SDL_SCANCODE_UP]) ? 1 : -1), 0.0f, 1.0f);
 		moveLeft = rcClamp(moveLeft + dt * 4 * ((keystate[SDL_SCANCODE_A] || keystate[SDL_SCANCODE_LEFT]) ? 1 : -1), 0.0f, 1.0f);
 		moveBack = rcClamp(moveBack + dt * 4 * ((keystate[SDL_SCANCODE_S] || keystate[SDL_SCANCODE_DOWN]) ? 1 : -1), 0.0f, 1.0f);
@@ -541,11 +546,11 @@ int main(int /*argc*/, char** /*argv*/)
 
 		if (sample)
 		{
-			sample->handleRenderOverlay((double*)projectionMatrix, (double*)modelviewMatrix, (int*)viewport);
+			sample->handleRenderOverlay((double *)projectionMatrix, (double *)modelviewMatrix, (int *)viewport);
 		}
 		if (test)
 		{
-			if (test->handleRenderOverlay((double*)projectionMatrix, (double*)modelviewMatrix, (int*)viewport))
+			if (test->handleRenderOverlay((double *)projectionMatrix, (double *)modelviewMatrix, (int *)viewport))
 				mouseOverMenu = true;
 		}
 
@@ -573,7 +578,7 @@ int main(int /*argc*/, char** /*argv*/)
 				ImGui::OpenPopup("Samples");
 			if (ImGui::BeginPopup("Samples"))
 			{
-				Sample* newSample = 0;
+				Sample *newSample = 0;
 				for (int i = 0; i < g_nsamples; ++i)
 				{
 					if (ImGui::Selectable(g_samples[i].name.c_str()))
@@ -653,8 +658,8 @@ int main(int /*argc*/, char** /*argv*/)
 			{
 				char text[64];
 				snprintf(text, 64, "Verts: %.1fk  Tris: %.1fk",
-					geom->getMesh()->getVertCount() / 1000.0f,
-					geom->getMesh()->getTriCount() / 1000.0f);
+						 geom->getMesh()->getVertCount() / 1000.0f,
+						 geom->getMesh()->getTriCount() / 1000.0f);
 				ImGui::Text(text);
 			}
 
@@ -665,15 +670,15 @@ int main(int /*argc*/, char** /*argv*/)
 				ImGui::PushID(0);
 				if (sample->getNavMesh())
 				{
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2/7.0f, 0.6f, 0.6f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2/7.0f, 0.7f, 0.7f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2/7.0f, 0.8f, 0.8f));
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(2 / 7.0f, 0.6f, 0.6f));
+					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(2 / 7.0f, 0.7f, 0.7f));
+					ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(2 / 7.0f, 0.8f, 0.8f));
 				}
 				else
 				{
-					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(5/7.0f, 0.6f, 0.6f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(5/7.0f, 0.7f, 0.7f));
-					ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(5/7.0f, 0.8f, 0.8f));
+					ImGui::PushStyleColor(ImGuiCol_Button, (ImVec4)ImColor::HSV(5 / 7.0f, 0.6f, 0.6f));
+					ImGui::PushStyleColor(ImGuiCol_ButtonHovered, (ImVec4)ImColor::HSV(5 / 7.0f, 0.7f, 0.7f));
+					ImGui::PushStyleColor(ImGuiCol_ButtonActive, (ImVec4)ImColor::HSV(5 / 7.0f, 0.8f, 0.8f));
 				}
 				if (ImGui::Button("     Build     "))
 				{
@@ -685,7 +690,7 @@ int main(int /*argc*/, char** /*argv*/)
 					}
 
 					ctx.dumpLog("Build log %s:", meshName.c_str());
-					
+
 					// Clear test.
 					delete test;
 					test = 0;
@@ -727,7 +732,7 @@ int main(int /*argc*/, char** /*argv*/)
 					}
 
 					// Create sample
-					Sample* newSample = 0;
+					Sample *newSample = 0;
 					for (int i = 0; i < g_nsamples; ++i)
 					{
 						if (g_samples[i].name == test->getSampleName())
@@ -749,7 +754,6 @@ int main(int /*argc*/, char** /*argv*/)
 
 					// Load geom.
 					meshName = test->getGeomFileName();
-
 
 					path = meshesFolder + "/" + meshName;
 
@@ -782,8 +786,8 @@ int main(int /*argc*/, char** /*argv*/)
 
 					if (geom || sample)
 					{
-						const float* bmin = 0;
-						const float* bmax = 0;
+						const float *bmin = 0;
+						const float *bmax = 0;
 						if (geom)
 						{
 							bmin = geom->getNavMeshBoundsMin();
@@ -793,8 +797,9 @@ int main(int /*argc*/, char** /*argv*/)
 						if (bmin && bmax)
 						{
 							camr = sqrtf(rcSqr(bmax[0] - bmin[0]) +
-								rcSqr(bmax[1] - bmin[1]) +
-								rcSqr(bmax[2] - bmin[2])) / 2;
+										 rcSqr(bmax[1] - bmin[1]) +
+										 rcSqr(bmax[2] - bmin[2])) /
+								   2;
 							cameraPos[0] = (bmax[0] + bmin[0]) / 2 + camr;
 							cameraPos[1] = (bmax[1] + bmin[1]) / 2 + camr;
 							cameraPos[2] = (bmax[2] + bmin[2]) / 2 + camr;
@@ -815,8 +820,8 @@ int main(int /*argc*/, char** /*argv*/)
 		}
 		if (sampleOrGeoDirty)
 		{
-			const float* bmin = 0;
-			const float* bmax = 0;
+			const float *bmin = 0;
+			const float *bmax = 0;
 			if (geom)
 			{
 				bmin = geom->getNavMeshBoundsMin();
@@ -826,8 +831,9 @@ int main(int /*argc*/, char** /*argv*/)
 			if (bmin && bmax)
 			{
 				camr = sqrtf(rcSqr(bmax[0] - bmin[0]) +
-					rcSqr(bmax[1] - bmin[1]) +
-					rcSqr(bmax[2] - bmin[2])) / 2;
+							 rcSqr(bmax[1] - bmin[1]) +
+							 rcSqr(bmax[2] - bmin[2])) /
+					   2;
 				cameraPos[0] = (bmax[0] + bmin[0]) / 2 + camr;
 				cameraPos[1] = (bmax[1] + bmin[1]) / 2 + camr;
 				cameraPos[2] = (bmax[2] + bmin[2]) / 2 + camr;
@@ -867,7 +873,7 @@ int main(int /*argc*/, char** /*argv*/)
 
 		// Marker
 		if (markerPositionSet && gluProject((GLdouble)markerPosition[0], (GLdouble)markerPosition[1], (GLdouble)markerPosition[2],
-			modelviewMatrix, projectionMatrix, viewport, &x, &y, &z))
+											modelviewMatrix, projectionMatrix, viewport, &x, &y, &z))
 		{
 			// Draw marker circle
 			glLineWidth(5.0f);
@@ -877,14 +883,13 @@ int main(int /*argc*/, char** /*argv*/)
 			for (int i = 0; i < 20; ++i)
 			{
 				const float a = (float)i / 20.0f * RC_PI * 2;
-				const float fx = (float)x + cosf(a)*r;
-				const float fy = (float)y + sinf(a)*r;
+				const float fx = (float)x + cosf(a) * r;
+				const float fy = (float)y + sinf(a) * r;
 				glVertex2f(fx, fy);
 			}
 			glEnd();
 			glLineWidth(1.0f);
 		}
-
 
 		ImGui::PopFont();
 		ImGui::PopStyleVar(1);
@@ -896,7 +901,6 @@ int main(int /*argc*/, char** /*argv*/)
 
 		ImGui::Render();
 		ImGui_ImplOpenGL2_RenderDrawData(ImGui::GetDrawData());
-
 
 		glEnable(GL_DEPTH_TEST);
 		SDL_GL_SwapWindow(window);
