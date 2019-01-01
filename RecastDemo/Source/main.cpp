@@ -133,7 +133,8 @@ int main(int /*argc*/, char ** /*argv*/)
 	SDL_SetWindowPosition(window, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED);
 	SDL_GLContext gl_context = SDL_GL_CreateContext(window);
 
-	SDL_GL_GetDrawableSize(window, &width, &height);
+	int drawWidth, drawHeight;
+	SDL_GL_GetDrawableSize(window, &drawWidth, &drawHeight);
 
 	// Setup Dear ImGui context
 	IMGUI_CHECKVERSION();
@@ -348,8 +349,8 @@ int main(int /*argc*/, char ** /*argv*/)
 				break;
 
 			case SDL_MOUSEMOTION:
-				mousePos[0] = event.motion.x;
-				mousePos[1] = height - 1 - event.motion.y;
+				mousePos[0] = event.motion.x * (drawWidth / width);
+				mousePos[1] = (height - 1 - event.motion.y) * (drawHeight / height);
 
 				if (rotate)
 				{
@@ -447,7 +448,7 @@ int main(int /*argc*/, char ** /*argv*/)
 		}
 
 		// Set the viewport.
-		glViewport(0, 0, width, height);
+		glViewport(0, 0, drawWidth, drawHeight);
 		GLint viewport[4];
 		glGetIntegerv(GL_VIEWPORT, viewport);
 
@@ -528,7 +529,7 @@ int main(int /*argc*/, char ** /*argv*/)
 		glDisable(GL_DEPTH_TEST);
 		glMatrixMode(GL_PROJECTION);
 		glLoadIdentity();
-		gluOrtho2D(0, width, 0, height);
+		gluOrtho2D(0, drawWidth, 0, drawHeight);
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
