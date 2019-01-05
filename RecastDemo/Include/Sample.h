@@ -124,6 +124,10 @@ protected:
 	bool m_filterLowHangingObstacles;
 	bool m_filterLedgeSpans;
 	bool m_filterWalkableLowHeightSpans;
+	bool m_drawTriMesh;
+	bool m_drawBound;
+	bool m_drawFog;
+	bool m_drawHeightfield;
 	
 	SampleTool* m_tool;
 	SampleToolState* m_toolStates[MAX_TOOLS];

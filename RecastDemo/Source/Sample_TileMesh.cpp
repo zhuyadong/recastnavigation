@@ -367,6 +367,8 @@ void Sample_TileMesh::handleTools()
 
 void Sample_TileMesh::handleDebugMode()
 {
+	Sample::handleDebugMode();
+
 	// Check which modes are valid.
 	bool valid[MAX_DRAWMODE];
 	for (int i = 0; i < MAX_DRAWMODE; ++i)
@@ -401,7 +403,6 @@ void Sample_TileMesh::handleDebugMode()
 	if (unavail == MAX_DRAWMODE)
 		return;
 	
-	ImGui::Text("Draw");
 	if (valid[DRAWMODE_MESH] && ImGui::RadioButton("Input Mesh", m_drawMode == DRAWMODE_MESH))
 		m_drawMode = DRAWMODE_MESH;
 	if (valid[DRAWMODE_NAVMESH] && ImGui::RadioButton("Navmesh", m_drawMode == DRAWMODE_NAVMESH))
@@ -452,24 +453,10 @@ void Sample_TileMesh::handleRender()
 	if (!m_geom || !m_geom->getMesh())
 		return;
 	
-	const float texScale = 1.0f / (m_cellSize * 10.0f);
-	
-	// Draw mesh
-	if (m_drawMode != DRAWMODE_NAVMESH_TRANS)
-	{
-		// Draw mesh
-		duDebugDrawTriMeshSlope(&m_dd, m_geom->getMesh()->getVerts(), m_geom->getMesh()->getVertCount(),
-								m_geom->getMesh()->getTris(), m_geom->getMesh()->getNormals(), m_geom->getMesh()->getTriCount(),
-								m_agentMaxSlope, texScale);
-		m_geom->drawOffMeshConnections(&m_dd);
-	}
-		
-	glDepthMask(GL_FALSE);
-	
-	// Draw bounds
+	Sample::handleRender();
+
 	const float* bmin = m_geom->getNavMeshBoundsMin();
 	const float* bmax = m_geom->getNavMeshBoundsMax();
-	//duDebugDrawBoxWire(&m_dd, bmin[0],bmin[1],bmin[2], bmax[0],bmax[1],bmax[2], duRGBA(255,255,255,128), 1.0f);
 	
 	// Tiling grid.
 	int gw = 0, gh = 0;

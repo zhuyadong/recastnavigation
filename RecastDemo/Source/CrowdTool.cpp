@@ -281,6 +281,7 @@ void CrowdToolState::handleRender()
 		const AgentTrail* trail = &m_trails[i];
 		const float* pos = ag->npos;
 		
+		/*
 		dd.begin(DU_DRAW_LINES,3.0f);
 		float prev[3], preva = 1;
 		dtVcopy(prev, pos);
@@ -295,7 +296,7 @@ void CrowdToolState::handleRender()
 			dtVcopy(prev, v);
 		}
 		dd.end();
-		
+		*/
 	}
 	
 	// Corners & co
@@ -505,6 +506,7 @@ void CrowdToolState::handleRender()
 		else if (ag->targetState == DT_CROWDAGENT_TARGET_VELOCITY)
 			col = duLerpCol(col, duRGBA(64,255,0,192), 128);
 		
+		/*
 		duDebugDrawCircle(&dd, pos[0], pos[1]+height, pos[2], radius, col, 2.0f);
 		
 		duDebugDrawArrow(&dd, pos[0],pos[1]+height,pos[2],
@@ -514,6 +516,7 @@ void CrowdToolState::handleRender()
 		duDebugDrawArrow(&dd, pos[0],pos[1]+height,pos[2],
 						 pos[0]+vel[0],pos[1]+height+vel[1],pos[2]+vel[2],
 						 0.0f, 0.4f, duRGBA(0,0,0,160), 2.0f);
+		*/
 	}
 	
 	dd.depthMask(true);

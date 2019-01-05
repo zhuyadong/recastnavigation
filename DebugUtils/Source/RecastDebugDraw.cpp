@@ -92,7 +92,7 @@ void duDebugDrawTriMeshSlope(duDebugDraw* dd, const float* verts, int /*nverts*/
 	float uvb[2];
 	float uvc[2];
 	
-	//dd->texture(true);
+	dd->texture(true);
 
 	const unsigned int unwalkable = duRGBA(192,128,0,255);
 	

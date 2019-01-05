@@ -178,6 +178,8 @@ void Sample_SoloMesh::handleTools()
 
 void Sample_SoloMesh::handleDebugMode()
 {
+	Sample::handleDebugMode();
+
 	// Check which modes are valid.
 	bool valid[MAX_DRAWMODE];
 	for (int i = 0; i < MAX_DRAWMODE; ++i)
@@ -211,7 +213,6 @@ void Sample_SoloMesh::handleDebugMode()
 	if (unavail == MAX_DRAWMODE)
 		return;
 
-	ImGui::Text("Draw");
 	if (valid[DRAWMODE_MESH] && ImGui::RadioButton("Input Mesh", m_drawMode == DRAWMODE_MESH))
 		m_drawMode = DRAWMODE_MESH;
 	if (valid[DRAWMODE_NAVMESH] && ImGui::RadioButton("Navmesh", m_drawMode == DRAWMODE_NAVMESH))
@@ -264,32 +265,11 @@ void Sample_SoloMesh::handleRender()
 	if (!m_geom || !m_geom->getMesh())
 		return;
 	
-	glEnable(GL_FOG);
-	glDepthMask(GL_TRUE);
-
-	const float texScale = 1.0f / (m_cellSize * 10.0f);
-	
-	if (m_drawMode != DRAWMODE_NAVMESH_TRANS)
+	Sample::handleRender();
+	if (m_solid && m_drawHeightfield)
 	{
-		// Draw mesh
-		duDebugDrawTriMeshSlope(&m_dd, m_geom->getMesh()->getVerts(), m_geom->getMesh()->getVertCount(),
-								m_geom->getMesh()->getTris(), m_geom->getMesh()->getNormals(), m_geom->getMesh()->getTriCount(),
-								m_agentMaxSlope, texScale);
-		m_geom->drawOffMeshConnections(&m_dd);
+		duDebugDrawHeightfieldSolid(&m_dd, *m_solid);
 	}
-	
-	glDisable(GL_FOG);
-	glDepthMask(GL_FALSE);
-
-	// Draw bounds
-	const float* bmin = m_geom->getNavMeshBoundsMin();
-	const float* bmax = m_geom->getNavMeshBoundsMax();
-	/*
-	duDebugDrawBoxWire(&m_dd, bmin[0],bmin[1],bmin[2], bmax[0],bmax[1],bmax[2], duRGBA(255,255,255,128), 1.0f);
-	m_dd.begin(DU_DRAW_POINTS, 5.0f);
-	m_dd.vertex(bmin[0],bmin[1],bmin[2],duRGBA(255,255,255,128));
-	m_dd.end();
-	*/
 	
 	if (m_navMesh && m_navQuery &&
 		(m_drawMode == DRAWMODE_NAVMESH ||

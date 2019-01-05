@@ -1032,18 +1032,8 @@ void Sample_TempObstacles::handleRender()
 	if (!m_geom || !m_geom->getMesh())
 		return;
 	
-	const float texScale = 1.0f / (m_cellSize * 10.0f);
-	
-	// Draw mesh
-	if (m_drawMode != DRAWMODE_NAVMESH_TRANS)
-	{
-		// Draw mesh
-		duDebugDrawTriMeshSlope(&m_dd, m_geom->getMesh()->getVerts(), m_geom->getMesh()->getVertCount(),
-								m_geom->getMesh()->getTris(), m_geom->getMesh()->getNormals(), m_geom->getMesh()->getTriCount(),
-								m_agentMaxSlope, texScale);
-		m_geom->drawOffMeshConnections(&m_dd);
-	}
-	
+	Sample::handleRender();
+
 	if (m_tileCache && m_drawMode == DRAWMODE_CACHE_BOUNDS)
 		drawTiles(&m_dd, m_tileCache);
 	

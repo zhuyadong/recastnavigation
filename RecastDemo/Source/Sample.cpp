@@ -66,6 +66,9 @@ Sample::Sample() :
 	m_filterLowHangingObstacles(true),
 	m_filterLedgeSpans(true),
 	m_filterWalkableLowHeightSpans(true),
+	m_drawTriMesh(true),
+	m_drawBound(true),
+	m_drawFog(true),
 	m_tool(0),
 	m_ctx(0)
 {
@@ -107,20 +110,51 @@ void Sample::handleTools()
 
 void Sample::handleDebugMode()
 {
+	ImGui::Text("Draw");
+	ImGui::Checkbox("Draw TriMesh", &m_drawTriMesh);
+	ImGui::Checkbox("Draw Bound", &m_drawBound);
+	ImGui::Checkbox("Draw Fog", &m_drawFog);
+	ImGui::Checkbox("Draw Heightfield", &m_drawHeightfield);
 }
 
 void Sample::handleRender()
 {
-	if (!m_geom)
+	if (!m_geom || !m_geom->getMesh())
 		return;
 	
-	// Draw mesh
-	duDebugDrawTriMesh(&m_dd, m_geom->getMesh()->getVerts(), m_geom->getMesh()->getVertCount(),
-					   m_geom->getMesh()->getTris(), m_geom->getMesh()->getNormals(), m_geom->getMesh()->getTriCount(), 0, 1.0f);
+	const float texScale = 1.0f / (m_cellSize * 10.0f);
+	
+	if (m_drawTriMesh)
+	{
+		if (m_drawFog) 
+			glEnable(GL_FOG);
+		else
+			glDisable(GL_FOG);
+		glDepthMask(GL_TRUE);
+
+		// Draw mesh
+		duDebugDrawTriMeshSlope(&m_dd, m_geom->getMesh()->getVerts(), m_geom->getMesh()->getVertCount(),
+								m_geom->getMesh()->getTris(), m_geom->getMesh()->getNormals(), m_geom->getMesh()->getTriCount(),
+								m_agentMaxSlope, texScale);
+		m_geom->drawOffMeshConnections(&m_dd);
+
+		glDisable(GL_FOG);
+		glDepthMask(GL_FALSE);
+	}
+	
+
 	// Draw bounds
-	const float* bmin = m_geom->getMeshBoundsMin();
-	const float* bmax = m_geom->getMeshBoundsMax();
-	duDebugDrawBoxWire(&m_dd, bmin[0],bmin[1],bmin[2], bmax[0],bmax[1],bmax[2], duRGBA(255,255,255,128), 1.0f);
+	if (m_drawBound)
+	{
+		const float* bmin = m_geom->getNavMeshBoundsMin();
+		const float* bmax = m_geom->getNavMeshBoundsMax();
+
+		duDebugDrawBoxWire(&m_dd, bmin[0],bmin[1],bmin[2], bmax[0],bmax[1],bmax[2], duRGBA(255,255,255,128), 1.0f);
+		m_dd.begin(DU_DRAW_POINTS, 5.0f);
+		m_dd.vertex(bmin[0],bmin[1],bmin[2],duRGBA(255,255,255,128));
+		m_dd.end();
+	}
+
 }
 
 void Sample::handleRenderOverlay(double* /*proj*/, double* /*model*/, int* /*view*/)
@@ -172,12 +206,12 @@ void Sample::collectSettings(BuildSettings& settings)
 
 void Sample::resetCommonSettings()
 {
-	m_cellSize = 0.5f;
-	m_cellHeight = 0.5f;
-	m_agentHeight = 0.1f;
-	m_agentRadius = 0.0f;
-	m_agentMaxClimb = 0.9f;
-	m_agentMaxSlope = 45.0f;
+	m_cellSize = 0.1f;
+	m_cellHeight = 0.1f;
+	m_agentHeight = 0.5f;
+	m_agentRadius = 0.1f;
+	m_agentMaxClimb = 0.6f;
+	m_agentMaxSlope = 60.0f;
 	m_regionMinSize = 8;
 	m_regionMergeSize = 20;
 	m_edgeMaxLen = 12.0f;
