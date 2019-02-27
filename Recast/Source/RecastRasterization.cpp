@@ -276,10 +276,6 @@ static bool rasterizeTri(const float* v0, const float* v1, const float* v2,
 	rcVcopy(&in[2*3], v2);
 	int nvrow, nvIn = 3;
 	
-#ifndef NDEBUG
-	hf.ddcache.begin(DU_DRAW_POINTS, 2.f);
-	auto drawPt = hf.ddcache.top();
-#endif
 	for (int y = y0; y <= y1; ++y)
 	{
 		// Clip polygon to row. Store the remaining polygon as well
@@ -294,9 +290,6 @@ static bool rasterizeTri(const float* v0, const float* v1, const float* v2,
 		{
 			if (minX > inrow[i*3])	minX = inrow[i*3];
 			if (maxX < inrow[i*3])	maxX = inrow[i*3];
-#ifndef NDEBUG
-			drawPt->vertex(&inrow[i * 3], duRGBA(255, 0, 0, 200));
-#endif
 		}
 		int x0 = (int)((minX - bmin[0])*ics);
 		int x1 = (int)((maxX - bmin[0])*ics);
@@ -319,9 +312,6 @@ static bool rasterizeTri(const float* v0, const float* v1, const float* v2,
 			{
 				smin = rcMin(smin, p1[i*3+1]);
 				smax = rcMax(smax, p1[i*3+1]);
-#ifndef NDEBUG
-			//hf.vertex(&p1[i * 3], duRGBA(0, 0, 255, 200));
-#endif
 			}
 			smin -= bmin[1];
 			smax -= bmin[1];
@@ -338,11 +328,6 @@ static bool rasterizeTri(const float* v0, const float* v1, const float* v2,
 			
 			if (!addSpan(hf, x, y, ismin, ismax, area, flagMergeThr))
 				return false;
-#ifndef NDEBUG
-			hf.ddcache.begin(DU_DRAW_LINES, 5.f);
-			hf.ddcache.vertex(x*cs, smin+bmin[1], y*cs, duRGBA(0, 255, 0, 200));
-			hf.ddcache.vertex(x*cs, smax+bmin[1], y*cs, duRGBA(0, 255, 0, 200));
-#endif
 		}
 	}
 
